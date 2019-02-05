@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Bachelor L.N</title>
+  <meta name="theme-color" content="#000">
+  <link rel="manifest" href="manifest.json"></link>
+  <script type="text/javascript" src="js/pwabuilder-sw.js"></script>
+  <script type="text/javascript" src="js/pwabuilder-sw-register.js"></script>
+  <script type="text/javascript" src="https://d3js.org/d3.v4.js"></script>
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1.0">
+  <link type="text/css" rel="stylesheet" href="css/force.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+</head>
+
+<body>
+  <div class="cut">
+    <h1>Medical Ontologies</h1>
+    <select id="cut_container" name="thashhold">
+      <option value="" disabled selected>Select threshhold</option>
+      <option value="force_100">100</option>
+      <option value="force_200">200</option>
+      <option value="force_300">300</option>
+      <option value="force_400">400</option>
+      <option value="force_500">500</option>
+      <option value="force_600">600</option>
+    </select>
+    <select id="centrality_container">
+      <option value="" disabled selected>Select centrality</option>
+      <option value="degree_centrality" >degree</option>
+      <option value="closeness_centrality">closeness</option>
+    </select>
+    <button id="show" type="button" name="show">Show</button>
+    <div class="showlegend">
+      <i class="fas fa-question-circle"></i>
+    </div>
+  </div>
+  <div class="legend" id="container"></div>
+  <div id="chart"></div>
+  <script type="text/javascript" src="json/POSTag.json"></script>
+  <script type="text/javascript" src="json/TAGColor.json"></script>
+  <script type="text/javascript" src="json/force_partitions_100.json"></script>
+  <script type="text/javascript" src="json/force_partitions_200.json"></script>
+  <script type="text/javascript" src="json/force_partitions_300.json"></script>
+  <script type="text/javascript" src="json/force_partitions_400.json"></script>
+  <script type="text/javascript" src="json/force_partitions_500.json"></script>
+  <script type="text/javascript" src="json/force_partitions_600.json"></script>
+  <script type="text/javascript" src="js/force.js"></script>
+</body>
+
+</html>
