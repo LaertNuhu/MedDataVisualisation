@@ -5,12 +5,24 @@ import pandas as pd
 This class is designed to parse an xml document to a pandas dataframe object. It can be used with a genaral
 xml data but it is specificly designed with the purpoues to be used for the smokingRecods datasetset.
 """
-
-
-# handels the xml to dataframe parsing
 class XMLDataframeParser:
     features = dict()
 
+    """
+    The findFeature function will be used on TEXT node contained on every Record Element.
+    Parameters explenation:
+    arry: accepts an array of lines. The imput is xml text data splited if \n (newline) is found
+    string: is a string element and this is the title of the text data that we are searching for.
+    For example if we want to collect all the data that corresponds to 'Report Status' the string
+    would be 'Report Status :'
+    skipString: because the data is not uniformal, meaning for each report there is not allways a
+    'Report Status' to be found we need to skip somtimes and just give an empty sting or null as
+    result. This parameter is of type string and is the next posible Title.
+    nextLine: is of type boolean and it will be used to skip a line if a defined string is found.
+    collectNext: For a paragraph there are multiple lines separated with (\n). That is a problem
+    because we need a paragrah and not only the first line of the paragraph. For that reason we use
+    a boolean if we want to have a hole paragraph and not only the first line.
+    """
     def findFeature(self, arry, string, skipString, nextline, collectNext):
         try:
             i = arry.index(string)
@@ -44,7 +56,7 @@ class XMLDataframeParser:
             return False
 
     # checks if node has text content
-    def getvalueofnode(self, node):
+    def getValueOfNode(self, node):
         """ return node text or None """
         return node.text if node is not None else None
 
@@ -67,7 +79,7 @@ class XMLDataframeParser:
     def getXMLElement(self, parent, element):
         return parent.find(element)
 
-    # returns the childeren elemnts of the root
+    # returns the childeren elements of the root
     def getXMLRootChildren(self, fileLocation):
         xml = ET.parse(fileLocation)
         root = xml.getroot()
@@ -107,26 +119,29 @@ class XMLDataframeParser:
     def getText(self, fileLocation):
         textArray = []
         rootChildren = self.getXMLRootChildren(fileLocation)
-        # add record ids in the features dictionary. We want to have ids as a featureColumn
-        self.addRecordIds(fileLocation)
+        # add record ids in the features dictionary. This is a feature that need to be discused
+        # self.addRecordIds(fileLocation)
         # a loop is needed to index all records and texts
         for child in rootChildren:
             # find the text element and get the value
             textNode = self.getXMLElement(child, "TEXT")
-            text = self.getvalueofnode(textNode)
+            text = self.getValueOfNode(textNode)
             # text is splited if newline is found
             text = text.split("\n")[1:]
             textArray.append(text)
         return textArray
 
+    # returns a dataframe object populated by the extracted features
     def getDataframe(self):
         # create a dataframe object
         df_xml = pd.DataFrame()
         # get the feauture directory
         features = self.getFeatures()
-        # get the directory keys and save them in a list
-        featureColumns = [*features]
-        # iterate through the list and add columns with the values in the DataFrame
-        for column in featureColumns:
-            df_xml[column] = features[column]
+        #checks if it is empty
+        if features:
+            # get the directory keys and save them in a list
+            featureColumns = [*features]
+            # iterate through the list and add columns with the values in the DataFrame
+            for column in featureColumns:
+                df_xml[column] = features[column]
         return df_xml
