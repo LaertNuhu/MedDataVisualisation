@@ -37,6 +37,9 @@ class XMLDataframeParser:
             return "NaN"
 
     # used to append lines that are in the same paragraph and so form a paragraph
+    # array: the text lines separated by newline in a array
+    # index: the index for the location of a specific element in the array
+    # collectNext: a boolean parameter which is true if we want to collect the next element in the array
     def appendText(self, array, index, collectNext):
         if collectNext:
             paragraph = ""
@@ -49,6 +52,7 @@ class XMLDataframeParser:
             return array[index]
 
     # Checks if we have a word, normaly a tiltle which starts with caps. Normaly at least the 2 first letters must be capital letters
+    # string: is a single element of the text tag array
     def isEntry(self, string):
         if string[0].isupper() & string[1].isupper():
             return True
@@ -65,6 +69,8 @@ class XMLDataframeParser:
         return dataframe[dataframe[column] != value]
 
     # removes empty rows
+    # df refers to the dataframe object which we want to apply changes
+    # column: the name of the column that we what to remove the empty rows
     def removeEmptyEntries(self, df, column):
         # filter results
         df = self.filterOut(df, column, "NaN")
@@ -80,6 +86,7 @@ class XMLDataframeParser:
         return parent.find(element)
 
     # returns the childeren elements of the root
+    # fileLocation: a string of the path to the xml file
     def getXMLRootChildren(self, fileLocation):
         xml = ET.parse(fileLocation)
         root = xml.getroot()
@@ -87,6 +94,7 @@ class XMLDataframeParser:
 
     # adds features derived from the text tag to the features directory
     # textArray is the 2 dimensional array: 1d for the record, 1d for the text itself in the record separated by newlines
+    # feature refers to the desired feature that we want to be extracted. It should be an exact match with what we find on the XML data
     # skipString servers to idnore some strings by some specific feautures from the xml
     # collectNext is a boolean and hepls with creatinng a text paragraph
     # nextline is also a boolean and tells if we want to continue with the next line
@@ -99,6 +107,7 @@ class XMLDataframeParser:
         XMLDataframeParser.features[featureKeyName] = featureArry
 
     # finds and add the record ids to the features directory. The porpouse of this is to create a special coulumn named id
+    # fileLocation: a string of the path to the xml file
     def addRecordIds(self, fileLocation):
         idArray = []
         rootChildren = self.getXMLRootChildren(fileLocation)
@@ -116,6 +125,7 @@ class XMLDataframeParser:
         return self.features
 
     # gets the xml file location and outputs a list of arrays with text data
+    # fileLocation: a string of the path to the xml file
     def getText(self, fileLocation):
         textArray = []
         rootChildren = self.getXMLRootChildren(fileLocation)
