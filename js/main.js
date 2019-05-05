@@ -15,7 +15,7 @@ var loadJS = function(url, implementationCode, location) {
 };
 
 var internalScriptCode = function() {
-  console.log("script loaded");
+  document.querySelector("#nodeNames").checked = false;
 };
 
 // variable definition

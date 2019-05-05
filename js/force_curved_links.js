@@ -5,30 +5,37 @@ var skipgram = document.querySelector("#skipgram");
 var clos_centra = document.querySelector("#clos_centra2");
 var deg_centra = document.querySelector("#deg_centra2");
 var displayNodes = document.querySelector("#nodeNames");
+var groups = document.querySelector("#groups");
+
+var show_groups = "";
 var centrality = "";
 
 centrality = clos_centra.checked ? "c" : "";
 centrality = deg_centra.checked ? "d" : "";
+show_groups = groups.checked ? "y" : "";
 
 createGraph(
   edgeWeight.checked,
   edgeCount.value,
   tfidf.checked,
   skipgram.value,
-  centrality
+  centrality,
+  show_groups
 );
 
 // add event listener to edge weight checkbox
 edgeWeight.addEventListener("change", function() {
   var centrality = clos_centra.checked ? "c" : "";
   centrality = deg_centra.checked ? "d" : "";
+  show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   createGraph(
     edgeWeight.checked,
     edgeCount.value,
     tfidf.checked,
     skipgram.value,
-    centrality
+    centrality,
+    show_groups
   );
 });
 
@@ -36,13 +43,15 @@ edgeCount.addEventListener("change", function() {
   var centrality = "";
   centrality = clos_centra.checked ? "c" : "";
   centrality = deg_centra.checked ? "d" : "";
+  show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   createGraph(
     edgeWeight.checked,
     edgeCount.value,
     tfidf.checked,
     skipgram.value,
-    centrality
+    centrality,
+    show_groups
   );
 });
 
@@ -50,6 +59,7 @@ tfidf.addEventListener("change", function() {
   var centrality = "";
   centrality = clos_centra.checked ? "c" : "";
   centrality = deg_centra.checked ? "d" : "";
+  show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   if (tfidf.checked) {
     edgeWeight.checked = true;
@@ -59,7 +69,8 @@ tfidf.addEventListener("change", function() {
     edgeCount.value,
     tfidf.checked,
     skipgram.value,
-    centrality
+    centrality,
+    show_groups
   );
 });
 
@@ -67,48 +78,62 @@ skipgram.addEventListener("change", function() {
   var centrality = "";
   centrality = clos_centra.checked ? "c" : "";
   centrality = deg_centra.checked ? "d" : "";
+  show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   createGraph(
     edgeWeight.checked,
     edgeCount.value,
     tfidf.checked,
     skipgram.value,
-    centrality
+    centrality,
+    show_groups
   );
 });
 
-clos_centra.addEventListener("change", function() {
+clos_centra.addEventListener("click", function() {
   displayNodes.checked = false;
-  if (clos_centra.checked) {
+  var show_groups = groups.checked ? "y" : "";
+  console.log(show_groups);
+  if (this.checked) {
     deg_centra.checked = false;
     createGraph(
       edgeWeight.checked,
       edgeCount.value,
       tfidf.checked,
       skipgram.value,
-      "c"
-    );
-  } else {
-    createGraph(
-      edgeWeight.checked,
-      edgeCount.value,
-      tfidf.checked,
-      skipgram.value,
-      "c"
+      "c",
+      show_groups
     );
   }
 });
 
-deg_centra.addEventListener("change", function() {
+deg_centra.addEventListener("click", function() {
   displayNodes.checked = false;
-  if (deg_centra.checked) {
+  var show_groups = groups.checked ? "y" : "";
+  console.log(show_groups);
+  if (this.checked) {
     clos_centra.checked = false;
     createGraph(
       edgeWeight.checked,
       edgeCount.value,
       tfidf.checked,
       skipgram.value,
-      "d"
+      "d",
+      show_groups
+    );
+  }
+});
+
+groups.addEventListener("click", function() {
+  displayNodes.checked = false;
+  if (this.checked) {
+    createGraph(
+      edgeWeight.checked,
+      edgeCount.value,
+      tfidf.checked,
+      skipgram.value,
+      centrality,
+      "y"
     );
   } else {
     createGraph(
@@ -116,7 +141,8 @@ deg_centra.addEventListener("change", function() {
       edgeCount.value,
       tfidf.checked,
       skipgram.value,
-      "c"
+      centrality,
+      ""
     );
   }
 });
@@ -126,11 +152,27 @@ deg_centra.addEventListener("change", function() {
  * @param {boolean} edgeWeight true in order to display edges with weights, false if not
  * @returns none
  */
-function createGraph(edgeWeight, edgeCount, tfidf, window_size, centrality) {
-  sendRequest(edgeCount, tfidf, window_size, centrality, getNetworkData);
+function createGraph(
+  edgeWeight,
+  edgeCount,
+  tfidf,
+  window_size,
+  centrality,
+  show_groups
+) {
+  sendRequest(
+    edgeCount,
+    tfidf,
+    window_size,
+    centrality,
+    show_groups,
+    getNetworkData
+  );
 
   var w = window.innerWidth,
-    h = window.outerHeight - 80;
+    h = window.outerHeight - 80,
+    color = d3.scaleOrdinal(d3.schemeCategory20),
+    radius = 10;
 
   function getNetworkData(graph) {
     var simulation = d3
@@ -145,8 +187,7 @@ function createGraph(edgeWeight, edgeCount, tfidf, window_size, centrality) {
         .force("center", d3.forceCenter(w / 2, h / 2))
         .force("x", d3.forceX(w / 2).strength(0.01))
         .force("y", d3.forceY(h / 2).strength(0.01))
-        .force("collide", d3.forceCollide()),
-      radius = 10;
+        .force("collide", d3.forceCollide())
     // remove svg if exists
     if (d3.select("svg")) {
       d3.select("svg").remove();
@@ -228,24 +269,25 @@ function createGraph(edgeWeight, edgeCount, tfidf, window_size, centrality) {
     var circles = node
       .append("circle")
       .attr("r", 5)
-      .attr("fill", "#90caf9");
+      .attr("fill", "#90caf9")
+      .transition()
+      .delay(500)
+      .duration(500);
+
+    if (show_groups) {
+      circles.attr("fill", function(d) {
+        return color(d.group);
+      });
+    }
 
     if (centrality == "c") {
-      circles
-        .transition()
-        .delay(500)
-        .duration(500)
-        .attr("r", function(d) {
-          return graph["closeness_centrality"][d.id] * 100;
-        });
+      circles.attr("r", function(d) {
+        return d.closeness_centrality * 100;
+      });
     } else if (centrality == "d") {
-      circles
-        .transition()
-        .delay(500)
-        .duration(500)
-        .attr("r", function(d) {
-          return graph["degree_centrality"][d.id] * 100;
-        });
+      circles.attr("r", function(d) {
+        return d.degree_centrality * 100;
+      });
     }
 
     node
@@ -326,7 +368,7 @@ function createGraph(edgeWeight, edgeCount, tfidf, window_size, centrality) {
       node
         .select("text")
         .attr("dx", function(d) {
-          return d.x+d.vx;
+          return d.x + d.vx;
         })
         .attr("dy", function(d) {
           return d.y + d.vy;
@@ -380,7 +422,14 @@ function createGraph(edgeWeight, edgeCount, tfidf, window_size, centrality) {
  * @param {Integer} window_size if it is bigger than 0 than the skipgram will be used
  * @param {Function} callback
  */
-function sendRequest(edgeCount, tfidf, window_size, centrality, callback) {
+function sendRequest(
+  edgeCount,
+  tfidf,
+  window_size,
+  centrality,
+  groups,
+  callback
+) {
   var Http = new XMLHttpRequest();
   var url = "";
   if (tfidf) {
@@ -389,7 +438,9 @@ function sendRequest(edgeCount, tfidf, window_size, centrality, callback) {
         "https://med-data-visualisation.herokuapp.com/tfidf/" +
         edgeCount +
         "?centrality=" +
-        centrality;
+        centrality +
+        "&groups=" +
+        groups;
     } else {
       url =
         "https://med-data-visualisation.herokuapp.com/tfidf/skipgram/" +
@@ -397,7 +448,9 @@ function sendRequest(edgeCount, tfidf, window_size, centrality, callback) {
         "?window_size=" +
         window_size +
         "&centrality=" +
-        centrality;
+        centrality +
+        "&groups=" +
+        groups;
     }
   } else {
     if (window_size == 0) {
@@ -405,7 +458,9 @@ function sendRequest(edgeCount, tfidf, window_size, centrality, callback) {
         "https://med-data-visualisation.herokuapp.com/count/" +
         edgeCount +
         "?centrality=" +
-        centrality;
+        centrality +
+        "&groups=" +
+        groups;
     } else {
       url =
         "https://med-data-visualisation.herokuapp.com/count/skipgram/" +
@@ -413,7 +468,9 @@ function sendRequest(edgeCount, tfidf, window_size, centrality, callback) {
         "?window_size=" +
         window_size +
         "&centrality=" +
-        centrality;
+        centrality +
+        "&groups=" +
+        groups;
     }
   }
 
