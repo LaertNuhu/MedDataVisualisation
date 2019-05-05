@@ -39,22 +39,6 @@ edgeWeight.addEventListener("change", function() {
   );
 });
 
-edgeCount.addEventListener("change", function() {
-  var centrality = "";
-  centrality = clos_centra.checked ? "c" : "";
-  centrality = deg_centra.checked ? "d" : "";
-  show_groups = groups.checked ? "y" : "";
-  displayNodes.checked = false;
-  createGraph(
-    edgeWeight.checked,
-    edgeCount.value,
-    tfidf.checked,
-    skipgram.value,
-    centrality,
-    show_groups
-  );
-});
-
 tfidf.addEventListener("change", function() {
   var centrality = "";
   centrality = clos_centra.checked ? "c" : "";
