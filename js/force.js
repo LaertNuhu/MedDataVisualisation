@@ -104,6 +104,15 @@ clos_centra.addEventListener("click", function() {
       "c",
       show_groups
     );
+  } else {
+    createGraph(
+      edgeWeight.checked,
+      edgeCount.value,
+      tfidf.checked,
+      skipgram.value,
+      "",
+      show_groups
+    );
   }
 });
 
@@ -119,6 +128,15 @@ deg_centra.addEventListener("click", function() {
       tfidf.checked,
       skipgram.value,
       "d",
+      show_groups
+    );
+  } else {
+    createGraph(
+      edgeWeight.checked,
+      edgeCount.value,
+      tfidf.checked,
+      skipgram.value,
+      "",
       show_groups
     );
   }
@@ -272,15 +290,13 @@ function createGraph(
     }
 
     if (centrality == "c") {
-      circles
-        .attr("r", function(d) {
-          return d.closeness_centrality * 100;
-        });
+      circles.attr("r", function(d) {
+        return d.closeness_centrality * 100;
+      });
     } else if (centrality == "d") {
-      circles
-        .attr("r", function(d) {
-          return d.degree_centrality * 100;
-        });
+      circles.attr("r", function(d) {
+        return d.degree_centrality * 100;
+      });
     }
 
     node

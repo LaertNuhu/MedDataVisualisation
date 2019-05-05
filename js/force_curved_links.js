@@ -104,6 +104,15 @@ clos_centra.addEventListener("click", function() {
       "c",
       show_groups
     );
+  } else {
+    createGraph(
+      edgeWeight.checked,
+      edgeCount.value,
+      tfidf.checked,
+      skipgram.value,
+      "",
+      show_groups
+    );
   }
 });
 
@@ -119,6 +128,15 @@ deg_centra.addEventListener("click", function() {
       tfidf.checked,
       skipgram.value,
       "d",
+      show_groups
+    );
+  } else {
+    createGraph(
+      edgeWeight.checked,
+      edgeCount.value,
+      tfidf.checked,
+      skipgram.value,
+      "",
       show_groups
     );
   }
@@ -176,18 +194,18 @@ function createGraph(
 
   function getNetworkData(graph) {
     var simulation = d3
-        .forceSimulation()
-        .force(
-          "link",
-          d3.forceLink().id(function(d) {
-            return d.id;
-          })
-        )
-        .force("charge", d3.forceManyBody())
-        .force("center", d3.forceCenter(w / 2, h / 2))
-        .force("x", d3.forceX(w / 2).strength(0.01))
-        .force("y", d3.forceY(h / 2).strength(0.01))
-        .force("collide", d3.forceCollide())
+      .forceSimulation()
+      .force(
+        "link",
+        d3.forceLink().id(function(d) {
+          return d.id;
+        })
+      )
+      .force("charge", d3.forceManyBody())
+      .force("center", d3.forceCenter(w / 2, h / 2))
+      .force("x", d3.forceX(w / 2).strength(0.01))
+      .force("y", d3.forceY(h / 2).strength(0.01))
+      .force("collide", d3.forceCollide());
     // remove svg if exists
     if (d3.select("svg")) {
       d3.select("svg").remove();
