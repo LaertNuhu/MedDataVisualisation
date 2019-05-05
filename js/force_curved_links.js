@@ -310,7 +310,8 @@ function createGraph(
 
     node
       .append("text")
-      .attr("x", 10)
+      .attr("x", 0)
+      .attr("text-anchor", "middle")
       .attr("y", "-10px")
       .attr("class", "label")
       .text(function(d) {

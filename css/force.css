@@ -21,6 +21,12 @@ g .label {
   /* Standard */
 }
 
+.label:hover {
+  transition: all 1s;
+  opacity: 1 !important;
+  display: inline;
+}
+
 body {
   /* background-color: #000;
   color: #fff; */
