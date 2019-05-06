@@ -174,7 +174,9 @@ function createGraph(
   var w = window.innerWidth,
     h = window.outerHeight - 80,
     color = d3.scaleOrdinal(d3.schemeCategory20),
-    radius = 10;
+    radius = 10,
+    POS = postagDict,
+    TAGColor = tagColor;
 
   function getNetworkData(graph) {
     var simulation = d3
@@ -266,7 +268,9 @@ function createGraph(
           .on("drag", dragged)
           .on("end", dragended)
       )
-      .on("click", connectedNodes);
+      .on("click", connectedNodes)
+      .on("mouseover", displayPOSTag(true))
+      .on("mouseout", displayPOSTag(false));
 
     var circles = node
       .append("circle")
@@ -296,7 +300,7 @@ function createGraph(
       .append("text")
       .attr("x", 0)
       .attr("text-anchor", "middle")
-      .attr("y", "-10px")
+      .attr("y", "2px")
       .attr("class", "label")
       .text(function(d) {
         return d.id;
@@ -357,14 +361,6 @@ function createGraph(
 
     function ticked() {
       link.attr("d", positionLink);
-      // node
-      //   .select("circle")
-      //   .attr("cx", function(d) {
-      //     return (d.x = Math.max(radius, Math.min(w - radius, d.x)));
-      //   })
-      //   .attr("cy", function(d) {
-      //     return (d.y = Math.max(radius, Math.min(h - radius, d.y)));
-      //   });
       node.select("circle").attr("transform", function(d) {
         return "translate(" + d.x + "," + d.y + ")";
       });
@@ -414,6 +410,45 @@ function createGraph(
     }
     /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   }
+  // POS taggs logic
+  /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  function mapcolorToTag(term) {
+    var TAG = POS[term];
+    return TAGColor[TAG];
+  }
+
+  function displayPOSTag(show) {
+    return function(d) {
+      if (show) {
+        d3.select(this)
+          .append("rect")
+          .attr("x", 300)
+          .attr("y", 14)
+          .attr("width", 60)
+          .attr("height", 56)
+          .attr("class", "POSTagCircle")
+          .style("fill", function(d) {
+            return mapcolorToTag(d.id);
+          })
+          .attr("rx", 6)
+          .attr("ry", 6);
+
+        d3.select(this)
+          .append("text")
+          .attr("x", 310)
+          .attr("y", 49)
+          .attr("class", "POSTag")
+          .style("fill", "#000")
+          .text(function(d) {
+            return POS[d.id];
+          });
+      } else {
+        d3.selectAll(".POSTag").remove();
+        d3.selectAll(".POSTagCircle").remove();
+      }
+    };
+  }
+  /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 }
 
 // server request function
@@ -478,8 +513,10 @@ function sendRequest(
   }
 
   Http.open("GET", url);
-  Http.send();
   Http.onreadystatechange = e => {
-    callback(JSON.parse(Http.responseText));
+    if (Http.readyState === 4 && Http.status === 200) {
+      callback(JSON.parse(Http.responseText));
+    }
   };
+  Http.send();
 }

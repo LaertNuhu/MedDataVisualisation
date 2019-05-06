@@ -10,7 +10,7 @@ circle.node {
   fill: none;
 }
 
-g .label {
+text.label {
   -webkit-user-select: none !important;
   /* Safari */
   -moz-user-select: none !important;
@@ -19,7 +19,9 @@ g .label {
   /* IE10+/Edge */
   user-select: none !important;
   /* Standard */
+  cursor: pointer;
 }
+
 
 .label:hover {
   transition: all 1s;
