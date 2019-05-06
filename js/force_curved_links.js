@@ -419,32 +419,21 @@ function createGraph(
 
   function displayPOSTag(show) {
     return function(d) {
+      var chart = document.querySelector("#chart");
+      var div = document.createElement("div");
+      div.className = "POScontainer";
+      div.innerHTML = POS[d.id];
+      div.style.backgroundColor = mapcolorToTag(d.id);
       if (show) {
-        d3.select(this)
-          .append("rect")
-          .attr("x", 300)
-          .attr("y", 14)
-          .attr("width", 60)
-          .attr("height", 56)
-          .attr("class", "POSTagCircle")
-          .style("fill", function(d) {
-            return mapcolorToTag(d.id);
-          })
-          .attr("rx", 6)
-          .attr("ry", 6);
-
-        d3.select(this)
-          .append("text")
-          .attr("x", 310)
-          .attr("y", 49)
-          .attr("class", "POSTag")
-          .style("fill", "#000")
-          .text(function(d) {
-            return POS[d.id];
-          });
+        chart.appendChild(div);
+        requestAnimationFrame(function() {
+          div.className = "POScontainerC";
+        });
       } else {
-        d3.selectAll(".POSTag").remove();
-        d3.selectAll(".POSTagCircle").remove();
+        var divCreated = document.querySelector(".POScontainerC");
+        if (divCreated) {
+          divCreated.parentNode.removeChild(divCreated);
+        }
       }
     };
   }
