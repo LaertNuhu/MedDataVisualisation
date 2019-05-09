@@ -372,6 +372,9 @@ function createGraph(
         .attr("dy", function(d) {
           return d.y + d.vy;
         });
+      if (show_groups) {
+        generateVornoi(this.alpha(), this.nodes());
+      }
     }
 
     function positionLink(d) {
@@ -409,7 +412,112 @@ function createGraph(
       d.fy = null;
     }
     /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    // vornoi logic
+    /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    if (show_groups) {
+      // add vornoi element
+      var voronoi = d3
+        .voronoi()
+        .x(function(d) {
+          return d.x;
+        })
+        .y(function(d) {
+          return d.y;
+        })
+        .extent([[-1 * w * w, -1 * h * h], [w * w, h * h]]);
+      var cells = g
+        .selectAll()
+        .data(graph.nodes)
+        .enter()
+        .append("g")
+        .attr("fill", "none")
+        .attr("stroke", function(d) {
+          return color(d.group);
+        })
+        .attr("class", function(d) {
+          return d.group;
+        });
+
+      var cell = cells
+        .append("path")
+        .data(voronoi.polygons(simulation.nodes()));
+    }
+    function generateVornoi(alpha, nodes) {
+      var coords = {};
+      var groups = [];
+
+      // sort the nodes into groups:
+      node.each(function(d) {
+        if (groups.indexOf(d.group) == -1) {
+          groups.push(d.group);
+          coords[d.group] = [];
+        }
+
+        coords[d.group].push({
+          x: d.x,
+          y: d.y
+        });
+      });
+
+      // get the centroid of each group:
+      var centroids = {};
+
+      for (var group in coords) {
+        var groupNodes = coords[group];
+        var n = groupNodes.length;
+        var cx = 0;
+        var tx = 0;
+        var cy = 0;
+        var ty = 0;
+
+        groupNodes.forEach(function(d) {
+          tx += d.x;
+          ty += d.y;
+        });
+
+        cx = tx / n;
+        cy = ty / n;
+
+        centroids[group] = {
+          x: cx,
+          y: cy
+        };
+      }
+
+      // don't modify points close the the group centroid:
+      var minDistance = 10;
+
+      if (alpha < 0.1) {
+        minDistance = 10 + 1000 * (0.1 - alpha);
+      }
+
+      // adjust each point if needed towards group centroid:
+      node.each(function(d) {
+        var cx = centroids[d.group].x;
+        var cy = centroids[d.group].y;
+        var x = d.x;
+        var y = d.y;
+        var dx = cx - x;
+        var dy = cy - y;
+
+        var r = Math.sqrt(dx * dx + dy * dy);
+
+        if (r > minDistance) {
+          d.x = x * 0.9 + cx * 0.1;
+          d.y = y * 0.9 + cy * 0.1;
+        }
+      });
+
+      // update voronoi:
+      cell = cell
+        .data(voronoi.polygons(simulation.nodes()))
+        .attr("d", renderCell);
+    }
   }
+  function renderCell(d) {
+    return d == null ? null : "M" + d.join("L") + "Z";
+  }
+  /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   // POS taggs logic
   /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   function mapcolorToTag(term) {
@@ -430,9 +538,13 @@ function createGraph(
           div.className = "POScontainerC";
         });
       } else {
-        var divCreated = document.querySelector(".POScontainerC");
-        if (divCreated) {
-          divCreated.parentNode.removeChild(divCreated);
+        var parentNode = document.querySelector(".POScontainerC").parentNode;
+        var divCreated = document.querySelectorAll(".POScontainerC");
+        if (divCreated.length > 0) {
+          for (let index = 0; index < divCreated.length > 0; index++) {
+            const element = divCreated[index];
+            parentNode.removeChild(element);
+          }
         }
       }
     };
