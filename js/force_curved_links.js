@@ -229,7 +229,7 @@ function createGraph(
     });
 
     // create nodes and edges
-    /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    //--------------------------------------------------------------/
     var link = g
       .append("g")
       .attr("class", "link")
@@ -284,6 +284,8 @@ function createGraph(
       circles.attr("fill", function(d) {
         return color(d.group);
       });
+      // create group taskbar
+      createGroupsTaskbar(displayGroupElements(graph), color);
     }
 
     if (centrality == "c") {
@@ -307,7 +309,7 @@ function createGraph(
       })
       .style("opacity", "0")
       .style("fill", "rgb(111, 111, 111)");
-    /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    //--------------------------------------------------------------/
 
     //add zoom capabilities
     var zoom_handler = d3.zoom().on("zoom", zoom_actions);
@@ -324,7 +326,7 @@ function createGraph(
     simulation.force("link").links(graph.links);
 
     // find neighbours logic
-    /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    //--------------------------------------------------------------/
     var toggle = 0;
     var linkedByIndex = {};
     for (i = 0; i < graph.nodes.length; i++) {
@@ -357,7 +359,7 @@ function createGraph(
     function neighboring(a, b) {
       return linkedByIndex[a.index + "," + b.index];
     }
-    /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    //--------------------------------------------------------------/
 
     function ticked() {
       link.attr("d", positionLink);
@@ -394,7 +396,7 @@ function createGraph(
       );
     }
     // draging functions
-    /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    //--------------------------------------------------------------/
     function dragstarted(d) {
       if (!d3.event.active) simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
@@ -411,9 +413,9 @@ function createGraph(
       d.fx = null;
       d.fy = null;
     }
-    /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    //--------------------------------------------------------------/
     // vornoi logic
-    /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    //--------------------------------------------------------------/
     if (show_groups) {
       // add vornoi element
       var voronoi = d3
@@ -517,9 +519,9 @@ function createGraph(
   function renderCell(d) {
     return d == null ? null : "M" + d.join("L") + "Z";
   }
-  /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  //--------------------------------------------------------------/
   // POS taggs logic
-  /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  //--------------------------------------------------------------/
   function mapcolorToTag(term) {
     var TAG = POS[term];
     return TAGColor[TAG];
@@ -537,6 +539,18 @@ function createGraph(
         requestAnimationFrame(function() {
           div.className = "POScontainerC";
         });
+
+        // focus on the group
+        var allGroups = document.querySelectorAll(".group");
+        allGroups.forEach(function(group) {
+          if (group.getAttribute("id") != d.group) {
+            group.style.display = "none";
+          } else {
+            var sibling = group.firstChild;
+            sibling = sibling.nextSibling;
+            sibling.style.display = "block";
+          }
+        });
       } else {
         var parentNode = document.querySelector(".POScontainerC").parentNode;
         var divCreated = document.querySelectorAll(".POScontainerC");
@@ -546,14 +560,96 @@ function createGraph(
             parentNode.removeChild(element);
           }
         }
+        // remove group focus
+        var allGroups = document.querySelectorAll(".group");
+        allGroups.forEach(function(group) {
+          var sibling = group.firstChild;
+          sibling = sibling.nextSibling;
+          group.style.display = "block";
+          sibling.style.display = "none";
+        });
       }
     };
   }
-  /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  //--------------------------------------------------------------/
+  // groups taskbar logic
+  //--------------------------------------------------------------/
+
+  // data preparation logic
+  function displayGroupElements(graph) {
+    var groupElements = graph.nodes.sort(function(a, b) {
+      return a.group - b.group;
+    });
+    var result = {};
+    groupElements.forEach(function(a) {
+      filtered = groupElements
+        .filter(function(b) {
+          return b.group === a.group;
+        })
+        .map(function(c) {
+          return c.id;
+        });
+      if (typeof a.group == "number") {
+        result[a.group] = filtered;
+      }
+    });
+    return result;
+  }
+
+  // dom manipulation fucntion
+  function createGroupsTaskbar(data, color) {
+    // find root
+    var root = document.querySelector(".groups");
+
+    root.innerHTML = "";
+
+    // get data
+    for (const [key, value] of Object.entries(data)) {
+      // create elements
+      var group = document.createElement("div");
+      group.className = "group";
+      group.setAttribute("id", key);
+      var text = document.createElement("div");
+      text.className = "text";
+      text.style.background = color(key);
+      var collapsable = document.createElement("div");
+      collapsable.className = "collapsable";
+      collapsable.style.background = color(key);
+      collapsable.style.display = "none";
+
+      // add content to elements
+      var groupNr = parseInt(key) + 1;
+      text.innerHTML = "Group " + groupNr;
+
+      // putting elements together
+      group.appendChild(text);
+
+      for (let i = 0; i < value.length; i++) {
+        var node = document.createElement("div");
+        node.className = "node";
+        node.innerHTML = value[i];
+        collapsable.appendChild(node);
+      }
+      group.appendChild(collapsable);
+      root.appendChild(group);
+
+      // add event listeners
+      text.addEventListener("click", function() {
+        var sibling = this.nextSibling;
+        if (sibling.style.display == "none") {
+          sibling.style.display = "block";
+        } else {
+          sibling.style.display = "none";
+        }
+      });
+    }
+  }
+
+  //--------------------------------------------------------------/
 }
 
 // server request function
-/**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+//--------------------------------------------------------------/
 /**
  *
  * @param {Integer} edgeCount the number of edges that showuld be visualized

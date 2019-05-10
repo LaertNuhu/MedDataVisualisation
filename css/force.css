@@ -21,6 +21,7 @@ text.label {
   /* Standard */
   cursor: pointer;
 }
+
 .POScontainer {
   opacity: 0;
   position: fixed;
@@ -34,6 +35,7 @@ text.label {
   z-index: 10;
   font-family: Andale Mono;
 }
+
 .POScontainerC {
   opacity: 1;
   position: fixed;
@@ -45,7 +47,7 @@ text.label {
   height: 55px;
   border-radius: 0 10px 10px 0;
   z-index: 10;
-  font-family: Andale Mono; 
+  font-family: Andale Mono;
   transition: all 0.5s;
 }
 
@@ -266,4 +268,52 @@ input[type=number] {
   position: absolute;
   bottom: -1px;
   height: 50%;
+}
+
+/* groups styling */
+.groups {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 400px;
+  width: 250px;
+  overflow-y: scroll;
+  background: rgba(204, 204, 204, 0);
+  border-radius: 5px;
+}
+
+.text {
+  background: #c4ebad;
+  padding: 10px 40px;
+  position: relative;
+  border-bottom: 1px solid #fff;
+  -webkit-user-select: none !important;
+  /* Safari */
+  -moz-user-select: none !important;
+  /* Firefox */
+  -ms-user-select: none !important;
+  /* IE10+/Edge */
+  user-select: none !important;
+  /* Standard */
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.text:hover {
+  background: inherit;
+  border-left: 5px solid #fff;
+  border-right: 5px solid #fff;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+
+.node {
+  padding: 10px 0;
+}
+
+.collapsable {
+  background: #c4ebad;
+  padding: 0 40px;
+  position: relative;
+  border-radius: 5px;
 }
