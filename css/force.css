@@ -273,8 +273,8 @@ input[type=number] {
 /* groups styling */
 .groups {
   position: fixed;
-  top: 0;
-  right: 0;
+  top: 10px;
+  right: 10px;
   height: 400px;
   width: 250px;
   overflow-y: scroll;
