@@ -151,7 +151,12 @@ groups.addEventListener("click", function() {
 
 /**
  * @description handels network generation
- * @param {boolean} edgeWeight true in order to display edges with weights, false if not
+ * @param {Boolean} edgeWeight true in order to display edges with weights, false if not
+ * @param {Number} edgeCount define how many edges are displayed
+ * @param {Boolean} tfidf decide if tfidf values should be used as edge weights
+ * @param {Number} window_size if bigger than 0 than this imlyies that skipgrams are used
+ * @param {String} centrality if d than the degree centrality will be requested. If c the closeness centrality.
+ * @param {String} show_groups if y the group attribute will be requested.
  * @returns none
  */
 function createGraph(
@@ -171,6 +176,7 @@ function createGraph(
     getNetworkData
   );
 
+  // define variabels
   var w = window.innerWidth,
     h = window.outerHeight - 80,
     color = d3.scaleOrdinal(d3.schemeCategory20),
@@ -178,7 +184,22 @@ function createGraph(
     POS = postagDict,
     TAGColor = tagColor;
 
+  /**
+   * @description gets the data and generates the node/link elements
+   * @param {Object} graph payload recieved from API
+   */
   function getNetworkData(graph) {
+    // remove svg if exists
+    if (d3.select("svg")) {
+      d3.select("svg").remove();
+    }
+    // add new svg element
+    var vis = d3
+      .select("#chart")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h);
+
     var simulation = d3
       .forceSimulation()
       .force(
@@ -192,18 +213,8 @@ function createGraph(
       .force("x", d3.forceX(w / 2).strength(0.01))
       .force("y", d3.forceY(h / 2).strength(0.01))
       .force("collide", d3.forceCollide());
-    // remove svg if exists
-    if (d3.select("svg")) {
-      d3.select("svg").remove();
-    }
-    // add new svg element
-    var vis = d3
-      .select("#chart")
-      .append("svg")
-      .attr("width", w)
-      .attr("height", h);
 
-    //add encompassing group for the zoom
+    //add root element. Zoom capability
     var g = vis.append("g").attr("class", "everything");
 
     var links = graph.links,
@@ -286,6 +297,10 @@ function createGraph(
       });
       // create group taskbar
       createGroupsTaskbar(displayGroupElements(graph), color);
+    } else {
+      // find root
+      var root = document.querySelector(".groups");
+      root.innerHTML = "";
     }
 
     if (centrality == "c") {
@@ -337,6 +352,9 @@ function createGraph(
       linkedByIndex[d.source.index + "," + d.target.index] = 1;
     });
 
+    /**
+     * @description shows the direct neighbours of the clicked node
+     */
     function connectedNodes() {
       if (toggle == 0) {
         d = d3.select(this).node().__data__;
@@ -414,6 +432,7 @@ function createGraph(
       d.fy = null;
     }
     //--------------------------------------------------------------/
+
     // vornoi logic
     //--------------------------------------------------------------/
     if (show_groups) {
@@ -444,6 +463,12 @@ function createGraph(
         .append("path")
         .data(voronoi.polygons(simulation.nodes()));
     }
+    /**
+     * @description Generates a Vornoi layout. Adapted from https://bl.ocks.org/Andrew-Reid/e689546e3449fd9f1fba1d19c30d6f6d
+     *
+     * @param {Number} alpha  D3 force layout's cooling parameter
+     * @param {Object} nodes
+     */
     function generateVornoi(alpha, nodes) {
       var coords = {};
       var groups = [];
@@ -516,17 +541,30 @@ function createGraph(
         .attr("d", renderCell);
     }
   }
+  /**
+   * @description For every node we render a vornoi cell. Paths will be created. See SVG path element: https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
+   * @param {Object} d a node object
+   */
   function renderCell(d) {
     return d == null ? null : "M" + d.join("L") + "Z";
   }
   //--------------------------------------------------------------/
+
   // POS taggs logic
   //--------------------------------------------------------------/
+  /**
+   * @description Based on the POS tag of the node, a color will be assigned to the POS tag.
+   * @param {String} term represent the POS tag for a node
+   */
   function mapcolorToTag(term) {
     var TAG = POS[term];
     return TAGColor[TAG];
   }
 
+  /**
+   * @description Created DOM elements and displays the Node POS tag when hovered
+   * @param {Boolean} show if true the POS tag will be showed.
+   */
   function displayPOSTag(show) {
     return function(d) {
       var chart = document.querySelector("#chart");
@@ -572,10 +610,15 @@ function createGraph(
     };
   }
   //--------------------------------------------------------------/
+
   // groups taskbar logic
   //--------------------------------------------------------------/
 
   // data preparation logic
+  /**
+   * @description Generates a object which conntains groups and the nodes inn them. The key is the group id and the value are the nodes.
+   * @param {Object} graph is the payload from API
+   */
   function displayGroupElements(graph) {
     var groupElements = graph.nodes.sort(function(a, b) {
       return a.group - b.group;
@@ -597,6 +640,11 @@ function createGraph(
   }
 
   // dom manipulation fucntion
+  /**
+   * @description Handels the creation of the group navbar.
+   * @param {Object} data conatains an directory with all the groups and the nodes which are part of them
+   * @param {Function} color equivalent to d3.scaleOrdinal(d3.schemeCategory20)
+   */
   function createGroupsTaskbar(data, color) {
     // find root
     var root = document.querySelector(".groups");
@@ -651,10 +699,13 @@ function createGraph(
 // server request function
 //--------------------------------------------------------------/
 /**
+ * @description The communication with the API will be handeled. See https://github.com/LaertNuhu/FlaskAPI for the endpoint documentation
  *
- * @param {Integer} edgeCount the number of edges that showuld be visualized
+ * @param {Integer} edgeCount the number of edges that should be visualized. Equivalent to threshold type 1.
  * @param {boolean} tfidf if true the tfidf values are showed
  * @param {Integer} window_size if it is bigger than 0 than the skipgram will be used
+ * @param {String} centrality if d than the degree centrality will be requested. If c the closeness centrality.
+ * @param {String} groups if y the group attribute will be requested.
  * @param {Function} callback
  */
 function sendRequest(
