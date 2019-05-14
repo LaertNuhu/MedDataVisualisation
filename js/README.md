@@ -1,6 +1,8 @@
 # Force.js documentation
 This script is responsible for creating network elements, communicating with the FlaskAPI and creating event listeners for the buttons on the controls container.
 
+__force_curved_links.js__ has the same functionality but it has slight differences when defining the links and nodesregarding their structure. We use there [Bézier curves](https://pomax.github.io/bezierinfo/).
+
 ### Legend
 |Line nr. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|Function|Notes|
 |---|---|---|
