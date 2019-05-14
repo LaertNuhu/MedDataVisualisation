@@ -1,8 +1,9 @@
 /**
- *
- * @param {*} url
- * @param {*} implementationCode
- * @param {*} location where to add the script tag
+ * Responsible for loading different scripts. Used for swiching between two scripts
+ * 
+ * @param {String} url the source of the script that should be loaded
+ * @param {Function} implementationCode the code that will run after the script is added
+ * @param {Object} location the location where the script tag should be added. Should be a DOM object
  */
 var loadJS = function(url, implementationCode, location) {
   var scriptTag = document.createElement("script");
@@ -14,19 +15,24 @@ var loadJS = function(url, implementationCode, location) {
   location.appendChild(scriptTag);
 };
 
+/**
+ * This method will be initialized after the script is loaded
+ */
 var internalScriptCode = function() {
   document.querySelector("#nodeNames").checked = false;
 };
+
+
+// initialize
+loadJS("js/force.js", internalScriptCode, document.body);
+document.querySelector("#displayExtrasCv").style.display = "none";
 
 // variable definition
 var straightLine = document.querySelector("#straight");
 var curvedLine = document.querySelector("#curved");
 var displayNodes = document.querySelector("#nodeNames");
 
-// initialize
-loadJS("js/force.js", internalScriptCode, document.body);
-document.querySelector("#displayExtrasCv").style.display = "none";
-
+// add event listener. If the event is trigered force.js script is loaded
 straightLine.addEventListener("click", function() {
   var displayExtrasSt = document.querySelector("#displayExtrasSt");
   var displayExtrasCv = document.querySelector("#displayExtrasCv");
@@ -41,6 +47,7 @@ straightLine.addEventListener("click", function() {
   }
 });
 
+// add event listener. If the event is trigered force_curved_links.js script is loaded
 curvedLine.addEventListener("click", function() {
   var displayExtrasSt = document.querySelector("#displayExtrasSt");
   var displayExtrasCv = document.querySelector("#displayExtrasCv");
@@ -55,6 +62,7 @@ curvedLine.addEventListener("click", function() {
   }
 });
 
+// add event listener. If the event is trigered node label is showed
 displayNodes.addEventListener("change", function() {
   var labels = document.querySelectorAll(".label");
   if (this.checked) {
@@ -70,7 +78,7 @@ displayNodes.addEventListener("change", function() {
   }
 });
 
-// input type numbers
+// We define different + - buttons for the input type number
 var quantity = document.querySelectorAll(".quantity");
 quantity.forEach(function(a) {
   var input = a.querySelector('input[type="number"]');
