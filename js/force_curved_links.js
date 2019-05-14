@@ -1,9 +1,9 @@
-var edgeWeight = document.querySelector("#edgeWeight");
+var edgeWeight = document.querySelector("#edgeWeight2");
 var tfidf = document.querySelector("#tfidf");
 var edgeCount = document.querySelector("#edge_count");
 var skipgram = document.querySelector("#skipgram");
-var clos_centra = document.querySelector("#clos_centra");
-var deg_centra = document.querySelector("#deg_centra");
+var clos_centra = document.querySelector("#clos_centra2");
+var deg_centra = document.querySelector("#deg_centra2");
 var displayNodes = document.querySelector("#nodeNames");
 var groups = document.querySelector("#groups");
 
@@ -26,22 +26,6 @@ createGraph(
 // add event listener to edge weight checkbox
 edgeWeight.addEventListener("change", function() {
   var centrality = clos_centra.checked ? "c" : "";
-  centrality = deg_centra.checked ? "d" : "";
-  show_groups = groups.checked ? "y" : "";
-  displayNodes.checked = false;
-  createGraph(
-    edgeWeight.checked,
-    edgeCount.value,
-    tfidf.checked,
-    skipgram.value,
-    centrality,
-    show_groups
-  );
-});
-
-edgeCount.addEventListener("change", function() {
-  var centrality = "";
-  centrality = clos_centra.checked ? "c" : "";
   centrality = deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
@@ -93,6 +77,7 @@ skipgram.addEventListener("change", function() {
 clos_centra.addEventListener("click", function() {
   displayNodes.checked = false;
   var show_groups = groups.checked ? "y" : "";
+  console.log(show_groups);
   if (this.checked) {
     deg_centra.checked = false;
     createGraph(
@@ -118,6 +103,7 @@ clos_centra.addEventListener("click", function() {
 deg_centra.addEventListener("click", function() {
   displayNodes.checked = false;
   var show_groups = groups.checked ? "y" : "";
+  console.log(show_groups);
   if (this.checked) {
     clos_centra.checked = false;
     createGraph(
@@ -193,8 +179,8 @@ function createGraph(
   // define variabels
   var w = window.innerWidth,
     h = window.outerHeight - 80,
-    radius = 5,
     color = d3.scaleOrdinal(d3.schemeCategory20),
+    radius = 10,
     POS = postagDict,
     TAGColor = tagColor;
 
@@ -218,57 +204,59 @@ function createGraph(
       .forceSimulation()
       .force(
         "link",
-        d3
-          .forceLink()
-          .id(function(d) {
-            return d.id;
-          })
-          .distance(function(d) {
-            return d.Weight;
-          })
-          .strength(function(link) {
-            if (show_groups) {
-              if (link.source.group == link.target.group) {
-                return 1; // stronger link for links within a group
-              } else {
-                return 0.2; // weaker links for links across groups
-              }
-            } else {
-              return 0.1;
-            }
-          })
+        d3.forceLink().id(function(d) {
+          return d.id;
+        })
       )
       .force("charge", d3.forceManyBody())
       .force("center", d3.forceCenter(w / 2, h / 2))
       .force("x", d3.forceX(w / 2).strength(0.01))
       .force("y", d3.forceY(h / 2).strength(0.01))
-      .force(
-        "collide",
-        d3.forceCollide().radius(d => {
-          return d.Weight;
-        })
-      );
+      .force("collide", d3.forceCollide());
 
     //add root element. Zoom capability
     var g = vis.append("g").attr("class", "everything");
+
+    var links = graph.links,
+      bilinks = [];
+    var nodes = graph.nodes,
+      nodeById = d3.map(nodes, function(d) {
+        return d.id;
+      });
+    links.forEach(function(link) {
+      var s = (link.source = nodeById.get(link.source)),
+        t = (link.target = nodeById.get(link.target)),
+        i = { Weight: link.Weight }; // intermediate node
+      nodes.push(i);
+      links.push(
+        { source: s, target: i, Weight: link.Weight },
+        { source: i, target: t, Weight: link.Weight }
+      );
+      bilinks.push([s, i, t]);
+    });
+
+    var linkWidthScale = d3.extent(links, function(d) {
+      return d.Weight;
+    });
+
     // create nodes and edges
     //--------------------------------------------------------------/
     var link = g
       .append("g")
       .attr("class", "link")
-      .selectAll("line")
-      .data(graph.links)
+      .selectAll(".link")
+      .data(bilinks)
       .enter()
-      .append("line");
+      .append("path");
 
     if (edgeWeight) {
       if (!tfidf) {
         link.attr("stroke-width", function(d) {
-          return Math.sqrt(d.Weight);
+          return Math.sqrt(d[1].Weight);
         });
       } else {
         link.attr("stroke-width", function(d) {
-          return d.Weight;
+          return d[1].Weight;
         });
       }
     }
@@ -277,7 +265,11 @@ function createGraph(
       .append("g")
       .attr("class", "nodes")
       .selectAll("g")
-      .data(graph.nodes)
+      .data(
+        nodes.filter(function(d) {
+          return d.id;
+        })
+      )
       .enter()
       .append("g")
       .call(
@@ -293,7 +285,7 @@ function createGraph(
 
     var circles = node
       .append("circle")
-      .attr("r", radius)
+      .attr("r", 5)
       .attr("fill", "#90caf9")
       .transition()
       .delay(500)
@@ -333,6 +325,7 @@ function createGraph(
       .style("opacity", "0")
       .style("fill", "rgb(111, 111, 111)");
     //--------------------------------------------------------------/
+
     //add zoom capabilities
     var zoom_handler = d3.zoom().on("zoom", zoom_actions);
 
@@ -370,7 +363,7 @@ function createGraph(
           return neighboring(d, o) | neighboring(o, d) ? 1 : 0;
         });
         link.style("opacity", function(link) {
-          return link.source === d || link.target === d ? 1 : 0;
+          return link[0] === d || link[2] === d ? 1 : 0;
         });
 
         toggle = 1;
@@ -387,24 +380,10 @@ function createGraph(
     //--------------------------------------------------------------/
 
     function ticked() {
-      link
-        .attr("x1", function(d) {
-          return d.source.x;
-        })
-        .attr("y1", function(d) {
-          return d.source.y;
-        })
-        .attr("x2", function(d) {
-          return d.target.x;
-        })
-        .attr("y2", function(d) {
-          return d.target.y;
-        });
-
+      link.attr("d", positionLink);
       node.select("circle").attr("transform", function(d) {
         return "translate(" + d.x + "," + d.y + ")";
       });
-
       node
         .select("text")
         .attr("dx", function(d) {
@@ -416,6 +395,23 @@ function createGraph(
       if (show_groups) {
         generateVornoi(this.alpha(), this.nodes());
       }
+    }
+
+    function positionLink(d) {
+      return (
+        "M" +
+        d[0].x +
+        "," +
+        d[0].y +
+        "S" +
+        d[1].x +
+        "," +
+        d[1].y +
+        " " +
+        d[2].x +
+        "," +
+        d[2].y
+      );
     }
     // draging functions
     //--------------------------------------------------------------/
@@ -450,7 +446,6 @@ function createGraph(
           return d.y;
         })
         .extent([[-1 * w * w, -1 * h * h], [w * w, h * h]]);
-
       var cells = g
         .selectAll()
         .data(graph.nodes)
@@ -637,12 +632,14 @@ function createGraph(
         .map(function(c) {
           return c.id;
         });
-      result[a.group] = filtered;
+      if (typeof a.group == "number") {
+        result[a.group] = filtered;
+      }
     });
     return result;
   }
 
-  // dom manipulation function
+  // dom manipulation fucntion
   /**
    * @description Handels the creation of the group navbar.
    * @param {Object} data conatains an directory with all the groups and the nodes which are part of them
