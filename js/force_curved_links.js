@@ -77,7 +77,6 @@ skipgram.addEventListener("change", function() {
 clos_centra.addEventListener("click", function() {
   displayNodes.checked = false;
   var show_groups = groups.checked ? "y" : "";
-  console.log(show_groups);
   if (this.checked) {
     deg_centra.checked = false;
     createGraph(
@@ -103,7 +102,6 @@ clos_centra.addEventListener("click", function() {
 deg_centra.addEventListener("click", function() {
   displayNodes.checked = false;
   var show_groups = groups.checked ? "y" : "";
-  console.log(show_groups);
   if (this.checked) {
     clos_centra.checked = false;
     createGraph(
