@@ -244,11 +244,6 @@ function createGraph(
       bilinks.push([s, i, t]);
     });
 
-    // var linkWidthScale = d3.extent(links, function(d) {
-    //   return d.Weight;
-    // });
-    console.log(links);
-
     // create nodes and edges
     //--------------------------------------------------------------/
     var link = g
