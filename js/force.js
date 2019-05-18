@@ -25,8 +25,7 @@ createGraph(
 
 // add event listener to edge weight checkbox
 edgeWeight.addEventListener("change", function() {
-  var centrality = clos_centra.checked ? "c" : "";
-  centrality = deg_centra.checked ? "d" : "";
+  centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   createGraph(
@@ -40,9 +39,7 @@ edgeWeight.addEventListener("change", function() {
 });
 
 edgeCount.addEventListener("change", function() {
-  var centrality = "";
-  centrality = clos_centra.checked ? "c" : "";
-  centrality = deg_centra.checked ? "d" : "";
+  centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   createGraph(
@@ -56,14 +53,13 @@ edgeCount.addEventListener("change", function() {
 });
 
 tfidf.addEventListener("change", function() {
-  var centrality = "";
-  centrality = clos_centra.checked ? "c" : "";
-  centrality = deg_centra.checked ? "d" : "";
+  centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   if (tfidf.checked) {
     edgeWeight.checked = true;
   }
+
   createGraph(
     edgeWeight.checked,
     edgeCount.value,
@@ -75,9 +71,7 @@ tfidf.addEventListener("change", function() {
 });
 
 skipgram.addEventListener("change", function() {
-  var centrality = "";
-  centrality = clos_centra.checked ? "c" : "";
-  centrality = deg_centra.checked ? "d" : "";
+  centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   createGraph(
@@ -141,6 +135,7 @@ deg_centra.addEventListener("click", function() {
 });
 
 groups.addEventListener("click", function() {
+  centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   displayNodes.checked = false;
   if (this.checked) {
     createGraph(
@@ -351,10 +346,11 @@ function createGraph(
     //--------------------------------------------------------------/
     var toggle = 0;
     var linkedByIndex = {};
+    // the same node is connected with itself
     for (i = 0; i < graph.nodes.length; i++) {
       linkedByIndex[i + "," + i] = 1;
     }
-
+    // get the nodes with wich the node is connected
     graph.links.forEach(function(d) {
       linkedByIndex[d.source.index + "," + d.target.index] = 1;
     });
@@ -621,22 +617,28 @@ function createGraph(
 
   // data preparation logic
   /**
-   * @description Generates a object which conntains groups and the nodes inn them. The key is the group id and the value are the nodes.
+   * @description Generates a object which conntains groups and the nodes in them. The key is the group id and the value are the nodes.
    * @param {Object} graph is the payload from API
    */
   function displayGroupElements(graph) {
     var groupElements = graph.nodes.sort(function(a, b) {
       return a.group - b.group;
     });
+
     var result = {};
     groupElements.forEach(function(a) {
-      filtered = groupElements
-        .filter(function(b) {
-          return b.group === a.group;
-        })
-        .map(function(c) {
-          return c.id;
+      filtered = groupElements.filter(function(b) {
+        return b.group === a.group;
+      });
+      if (centrality == "d") {
+        filtered.sort(function(a, b) {
+          return b.degree_centrality - a.degree_centrality;
         });
+      } else if (centrality == "c") {
+        filtered.sort(function(a, b) {
+          return b.closeness_centrality - a.closeness_centrality;
+        });
+      }
       result[a.group] = filtered;
     });
     return result;
@@ -653,7 +655,6 @@ function createGraph(
     var root = document.querySelector(".groups");
 
     root.innerHTML = "";
-
     // get data
     for (const [key, value] of Object.entries(data)) {
       // create elements
@@ -671,14 +672,28 @@ function createGraph(
       // add content to elements
       var groupNr = parseInt(key) + 1;
       text.innerHTML = "Group " + groupNr;
-
       // putting elements together
       group.appendChild(text);
 
       for (let i = 0; i < value.length; i++) {
+        // create div with node label
         var node = document.createElement("div");
         node.className = "node";
-        node.innerHTML = value[i];
+        node.innerHTML = value[i].id;
+        // create div with node centrality value
+        var centralityInfo = document.createElement("div");
+        centralityInfo.className = "centrality";
+        if (centrality == "d") {
+          centralityInfo.innerHTML = Number.parseFloat(
+            value[i].degree_centrality
+          ).toFixed(2);
+          node.appendChild(centralityInfo);
+        } else if (centrality == "c") {
+          centralityInfo.innerHTML = Number.parseFloat(
+            value[i].closeness_centrality
+          ).toFixed(2);
+          node.appendChild(centralityInfo);
+        }
         collapsable.appendChild(node);
       }
       group.appendChild(collapsable);

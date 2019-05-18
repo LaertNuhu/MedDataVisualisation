@@ -25,8 +25,21 @@ createGraph(
 
 // add event listener to edge weight checkbox
 edgeWeight.addEventListener("change", function() {
-  var centrality = clos_centra.checked ? "c" : "";
-  centrality = deg_centra.checked ? "d" : "";
+  centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
+  show_groups = groups.checked ? "y" : "";
+  displayNodes.checked = false;
+  createGraph(
+    edgeWeight.checked,
+    edgeCount.value,
+    tfidf.checked,
+    skipgram.value,
+    centrality,
+    show_groups
+  );
+});
+
+edgeCount.addEventListener("change", function() {
+  centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   createGraph(
@@ -40,14 +53,13 @@ edgeWeight.addEventListener("change", function() {
 });
 
 tfidf.addEventListener("change", function() {
-  var centrality = "";
-  centrality = clos_centra.checked ? "c" : "";
-  centrality = deg_centra.checked ? "d" : "";
+  centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   if (tfidf.checked) {
     edgeWeight.checked = true;
   }
+
   createGraph(
     edgeWeight.checked,
     edgeCount.value,
@@ -59,9 +71,7 @@ tfidf.addEventListener("change", function() {
 });
 
 skipgram.addEventListener("change", function() {
-  var centrality = "";
-  centrality = clos_centra.checked ? "c" : "";
-  centrality = deg_centra.checked ? "d" : "";
+  centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
   createGraph(
@@ -125,6 +135,7 @@ deg_centra.addEventListener("click", function() {
 });
 
 groups.addEventListener("click", function() {
+  centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   displayNodes.checked = false;
   if (this.checked) {
     createGraph(
@@ -233,9 +244,10 @@ function createGraph(
       bilinks.push([s, i, t]);
     });
 
-    var linkWidthScale = d3.extent(links, function(d) {
-      return d.Weight;
-    });
+    // var linkWidthScale = d3.extent(links, function(d) {
+    //   return d.Weight;
+    // });
+    console.log(links);
 
     // create nodes and edges
     //--------------------------------------------------------------/
@@ -623,13 +635,18 @@ function createGraph(
     });
     var result = {};
     groupElements.forEach(function(a) {
-      filtered = groupElements
-        .filter(function(b) {
-          return b.group === a.group;
-        })
-        .map(function(c) {
-          return c.id;
+      filtered = groupElements.filter(function(b) {
+        return b.group === a.group;
+      });
+      if (centrality == "d") {
+        filtered.sort(function(a, b) {
+          return b.degree_centrality - a.degree_centrality;
         });
+      } else if (centrality == "c") {
+        filtered.sort(function(a, b) {
+          return b.closeness_centrality - a.closeness_centrality;
+        });
+      }
       if (typeof a.group == "number") {
         result[a.group] = filtered;
       }
@@ -673,7 +690,21 @@ function createGraph(
       for (let i = 0; i < value.length; i++) {
         var node = document.createElement("div");
         node.className = "node";
-        node.innerHTML = value[i];
+        node.innerHTML = value[i].id;
+        // create div with node centrality value
+        var centralityInfo = document.createElement("div");
+        centralityInfo.className = "centrality";
+        if (centrality == "d") {
+          centralityInfo.innerHTML = Number.parseFloat(
+            value[i].degree_centrality
+          ).toFixed(2);
+          node.appendChild(centralityInfo);
+        } else if (centrality == "c") {
+          centralityInfo.innerHTML = Number.parseFloat(
+            value[i].closeness_centrality
+          ).toFixed(2);
+          node.appendChild(centralityInfo);
+        }
         collapsable.appendChild(node);
       }
       group.appendChild(collapsable);
