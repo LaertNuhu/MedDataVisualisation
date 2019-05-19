@@ -24,7 +24,7 @@ createGraph(
 );
 
 // add event listener to edge weight checkbox
-edgeWeight.addEventListener("change", function() {
+edgeWeight.addEventListener("change", function(e) { e.stopImmediatePropagation() // stop propagation. Event missfieres by chrome. 
   centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
@@ -38,7 +38,7 @@ edgeWeight.addEventListener("change", function() {
   );
 });
 
-edgeCount.addEventListener("change", function() {
+edgeCount.addEventListener("change", function(e) { e.stopImmediatePropagation() // stop propagation. Event missfieres by chrome. 
   centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
@@ -52,7 +52,7 @@ edgeCount.addEventListener("change", function() {
   );
 });
 
-tfidf.addEventListener("change", function() {
+tfidf.addEventListener("change", function(e) { e.stopImmediatePropagation() // stop propagation. Event missfieres by chrome. 
   centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
@@ -70,7 +70,7 @@ tfidf.addEventListener("change", function() {
   );
 });
 
-skipgram.addEventListener("change", function() {
+skipgram.addEventListener("change", function(e) { e.stopImmediatePropagation() // stop propagation. Event missfieres by chrome. 
   centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   show_groups = groups.checked ? "y" : "";
   displayNodes.checked = false;
@@ -84,7 +84,7 @@ skipgram.addEventListener("change", function() {
   );
 });
 
-clos_centra.addEventListener("click", function() {
+clos_centra.addEventListener("click", function(e) { e.stopImmediatePropagation() // stop propagation. Event missfieres by chrome. 
   displayNodes.checked = false;
   var show_groups = groups.checked ? "y" : "";
   if (this.checked) {
@@ -109,7 +109,7 @@ clos_centra.addEventListener("click", function() {
   }
 });
 
-deg_centra.addEventListener("click", function() {
+deg_centra.addEventListener("click", function(e) { e.stopImmediatePropagation() // stop propagation. Event missfieres by chrome. 
   displayNodes.checked = false;
   var show_groups = groups.checked ? "y" : "";
   if (this.checked) {
@@ -134,7 +134,7 @@ deg_centra.addEventListener("click", function() {
   }
 });
 
-groups.addEventListener("click", function() {
+groups.addEventListener("click", function(e) { e.stopImmediatePropagation() // stop propagation. Event missfieres by chrome. 
   centrality = clos_centra.checked ? "c" : deg_centra.checked ? "d" : "";
   displayNodes.checked = false;
   if (this.checked) {
