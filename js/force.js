@@ -308,11 +308,11 @@ function createGraph(
 
     if (centrality == "c") {
       circles.attr("r", function(d) {
-        return d.closeness_centrality * 100;
+        return 3+(d.closeness_centrality * 50);
       });
     } else if (centrality == "d") {
       circles.attr("r", function(d) {
-        return d.degree_centrality * 100;
+        return 3+(d.degree_centrality * 100);
       });
     }
 
@@ -325,7 +325,7 @@ function createGraph(
       .text(function(d) {
         return d.id;
       })
-      .style("opacity", "0")
+      .style("opacity", "0").style("font-size",(d)=>{return d.degree_centrality?  5 +(300 *d.degree_centrality) +"px" : d.closeness_centrality?  4 +(Math.pow(10,Math.exp(d.closeness_centrality)))+"px":""})
       .style("fill", "rgb(111, 111, 111)");
     //--------------------------------------------------------------/
     //add zoom capabilities
