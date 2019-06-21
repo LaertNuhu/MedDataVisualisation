@@ -6,8 +6,6 @@ We generate and visualize a weighted semantic network from pairwise term-occurre
 |----|-----|
 |__Impelmentaion notebook__|Provides with information about data manipulation, normalization, exploration, text network analysis and network data preparation|
 |__index.html__| Part of frontend|
-|__manifest.json__| Contains metadata for the browser|
-|__icon.png__| Used as thumbnail from the frontend|
 |__py/__| Contains python scripts for data manipulation and normailzation|
 |__json/__| Provides with objects that contain POStags and the POS taggs colors|
 |__js/__| Provides scripts which handle network generation on the frontend|
